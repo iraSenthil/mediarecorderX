@@ -5,7 +5,9 @@ import MediaRecorder from "./MediaRecorder";
 function App() {
   return (
     <div className="center-me">
-      <MediaRecorder />
+      <div>
+        <MediaRecorder />
+      </div>
     </div>
   );
 }
