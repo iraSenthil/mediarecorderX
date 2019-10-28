@@ -4,17 +4,29 @@ function MediaRecorder() {
   const mediaRecorderRef = useRef();
   const videoControlRef = useRef();
   const streamRef = useRef();
+  const chunksRef = useRef([]);
 
   const [error, setError] = useState();
   const [recording, setRecording] = useState(false);
   const [initilialized, setInitialized] = useState(false);
+  const [videoFile, setVideoFile] = useState();
 
   function initMediaRecorder() {
     const handleSuccess = stream => {
       mediaRecorderRef.current = new window.MediaRecorder(stream);
       streamRef.current = stream;
-      mediaRecorderRef.current.ondataavailable = function(...args) {
-        console.info("ondataavailable", args);
+      mediaRecorderRef.current.ondataavailable = function(e) {
+        chunksRef.current.push(e.data);
+      };
+
+      mediaRecorderRef.current.onstop = function() {
+        const blob = new Blob(chunksRef.current);
+        chunksRef.current = [];
+
+        const videoUrl = window.URL.createObjectURL(blob);
+        const rand = Math.floor(Math.random() * 10000000);
+        const name = "video_" + rand + ".mp4";
+        setVideoFile({ name, videoUrl });
       };
 
       setInitialized(true);
@@ -27,6 +39,8 @@ function MediaRecorder() {
     const videoConstrains = {
       audio: true,
       video: {
+        width: { exact: 240 },
+        height: { exact: 320 },
         facingMode: "user"
       }
     };
@@ -55,6 +69,10 @@ function MediaRecorder() {
     } else {
       mediaRecorderRef.current.start();
       setRecording(true);
+      if (videoFile) {
+        URL.revokeObjectURL(videoFile.videoUrl);
+      }
+      setVideoFile(undefined);
     }
   }
 
@@ -88,6 +106,21 @@ function MediaRecorder() {
           {recording ? "Stop" : "Start"}
         </button>
       </div>
+
+      {videoFile && (
+        <>
+          <div>
+            <a
+              href={videoFile.videoUrl}
+              download={videoFile.name}
+              name={videoFile.name}
+            >
+              Download
+            </a>
+          </div>
+          <video controls src={videoFile.videoUrl} />
+        </>
+      )}
     </div>
   );
 }
