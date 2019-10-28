@@ -63,7 +63,7 @@ function MediaRecorder() {
   }
 
   if (!initilialized) {
-    return <div>Allow Camers and enabled exprimental features</div>;
+    return <div>Instructions to enable exprimental settings.</div>;
   }
 
   return (
