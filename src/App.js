@@ -1,15 +1,8 @@
 import React from "react";
-import "./App.css";
-import MediaRecorder from "./MediaRecorder";
+import MediaRecorder from "./safariVideoRecorder";
 
 function App() {
-  return (
-    <div className="center-me">
-      <div>
-        <MediaRecorder />
-      </div>
-    </div>
-  );
+  return <MediaRecorder />;
 }
 
 export default App;

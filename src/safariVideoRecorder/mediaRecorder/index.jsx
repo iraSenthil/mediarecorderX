@@ -4,24 +4,23 @@ function MediaRecorder() {
   const mediaRecorderRef = useRef();
   const videoControlRef = useRef();
   const streamRef = useRef();
-  const urlRef = useRef();
+
   const [error, setError] = useState();
-  const [recording, setRecording] = useState();
+  const [recording, setRecording] = useState(false);
+  const [initilialized, setInitialized] = useState(false);
 
   function initMediaRecorder() {
     const handleSuccess = stream => {
       mediaRecorderRef.current = new window.MediaRecorder(stream);
       streamRef.current = stream;
-      mediaRecorderRef.current.start(3 * 1000);
       mediaRecorderRef.current.ondataavailable = function(...args) {
         console.info("ondataavailable", args);
       };
 
-      setRecording(true);
+      setInitialized(true);
     };
 
     const handleFaileure = err => {
-      console.error(err);
       setError({ error: err });
     };
 
@@ -39,7 +38,12 @@ function MediaRecorder() {
   }
 
   useEffect(() => {
-    if (recording) {
+    initMediaRecorder();
+  }, []);
+
+  useEffect(() => {
+    // Check videoControlRef.current.srcObject to avoid setting it again and again which causes flashing
+    if (streamRef.current && !videoControlRef.current.srcObject) {
       videoControlRef.current.srcObject = streamRef.current;
     }
   });
@@ -49,32 +53,41 @@ function MediaRecorder() {
       mediaRecorderRef.current.stop();
       setRecording(false);
     } else {
-      initMediaRecorder();
+      mediaRecorderRef.current.start();
+      setRecording(true);
     }
   }
 
+  if (error) {
+    return <div>Error : {JSON.stringify(error)}</div>;
+  }
+
+  if (!initilialized) {
+    return <div>Allow Camers and enabled exprimental features</div>;
+  }
+
   return (
-    <div className="cente">
-      {error && <div>Error : {JSON.stringify(error)}</div>}
-      <div>
-        <button
-          type="button"
-          onClick={handleButtonClick}
-          style={{ margin: "0 auto", display: "block" }}
-        >
-          Start/Stop
-        </button>
-      </div>
-      {recording && (
+    <div>
+      <div className="row justify-content-center">
         <video
-          style={{ width: "80vw", height: "50vh" }}
+          style={{ width: "80%" }}
           autoPlay
           muted
           preload="preload"
           playsInline
           ref={videoControlRef}
         />
-      )}
+      </div>
+
+      <div className="py-3 row justify-content-center">
+        <button
+          type="button"
+          onClick={handleButtonClick}
+          className="btn btn-primary"
+        >
+          {recording ? "Stop" : "Start"}
+        </button>
+      </div>
     </div>
   );
 }
