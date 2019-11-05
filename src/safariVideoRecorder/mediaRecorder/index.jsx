@@ -20,7 +20,9 @@ function MediaRecorder() {
       };
 
       mediaRecorderRef.current.onstop = function() {
-        const blob = new Blob(chunksRef.current);
+        const blob = new Blob(chunksRef.current, {
+          type: chunksRef.current[0].type
+        });
         chunksRef.current = [];
 
         const videoUrl = window.URL.createObjectURL(blob);
@@ -39,8 +41,8 @@ function MediaRecorder() {
     const videoConstrains = {
       audio: true,
       video: {
-        width: { exact: 240 },
-        height: { exact: 320 },
+        width: { exact: 500 },
+        height: { exact: 282 },
         facingMode: "user"
       }
     };
@@ -87,8 +89,8 @@ function MediaRecorder() {
   return (
     <div>
       <div className="row justify-content-center">
+        <div>window.orientation {window.orientation}</div>
         <video
-          style={{ width: "80%" }}
           autoPlay
           muted
           preload="preload"
@@ -109,6 +111,7 @@ function MediaRecorder() {
 
       {videoFile && (
         <>
+          <div>{JSON.stringify(videoFile, null, 2)} </div>
           <div>
             <a
               href={videoFile.videoUrl}
@@ -118,7 +121,7 @@ function MediaRecorder() {
               Download
             </a>
           </div>
-          <video controls src={videoFile.videoUrl} />
+          <video controls src={videoFile.videoUrl} playsInline />
         </>
       )}
     </div>
